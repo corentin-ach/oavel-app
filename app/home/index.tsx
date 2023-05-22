@@ -1,30 +1,64 @@
 import { StyleSheet } from 'react-native';
-import { Button, Card, Colors, Text, View } from 'react-native-ui-lib';
+import {
+  Button,
+  Card,
+  Colors,
+  ProgressBar,
+  Text,
+  TextField,
+  View,
+} from 'react-native-ui-lib';
 import LottieView from 'lottie-react-native';
 import goodQuality from '../../assets/goodQuality.json';
-import Mapbox from '@rnmapbox/maps';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import ModalView from '../../components/modal.component';
+import MapView from '../../components/map.component';
 
 function Home() {
-  Mapbox.setAccessToken(
-    'pk.eyJ1IjoiY29yZW50aW4yOSIsImEiOiJja3V3dmgxOG0wMTdpMnZsOGs2OGU4eDQzIn0.p3UORX0_zEWs7XpxBBWMHA',
-  );
+  const boxHeight = useSharedValue('15%');
+  const truncatedAnimation = useAnimatedStyle(() => {
+    return {
+      height: withTiming(boxHeight.value, { duration: 400 }),
+    };
+  }, []);
+  const showBar = () => {
+    boxHeight.value === '15%'
+      ? (boxHeight.value = '25%')
+      : (boxHeight.value = '15%');
+  };
+
   return (
-    <View style={styles.container}>
-      <View
-        style={{
-          padding: 15,
-          paddingTop: 60,
-          height: '25%',
-          backgroundColor: 'white',
-          borderBottomLeftRadius: 40,
-          borderBottomRightRadius: 40,
-          alignItems: 'center',
-          position: 'absolute',
-          top: 0,
-          width: '100%',
-        }}
+    <View style={{ flex: 1 }}>
+      <Animated.View
+        style={[
+          {
+            padding: 15,
+            paddingTop: 60,
+            height: '15%',
+            backgroundColor: 'white',
+            borderBottomLeftRadius: 40,
+            borderBottomRightRadius: 40,
+            alignItems: 'center',
+            position: 'absolute',
+            top: 0,
+            width: '100%',
+            zIndex: 2,
+          },
+          truncatedAnimation,
+        ]}
       >
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}
+        >
           <LottieView
             autoPlay
             style={{
@@ -34,10 +68,8 @@ function Home() {
             source={goodQuality}
           />
           <View>
-            <Text text70>Today, 18 May</Text>
-            <Text text60BO style={{ fontWeight: 'bold' }}>
-              Newy Beach
-            </Text>
+            <Text style={{ fontWeight: '800', fontSize: 20 }}>Newy Beach</Text>
+            <Text>Last update on 18 May</Text>
           </View>
           <View>
             <Button
@@ -45,26 +77,17 @@ function Home() {
               label="🔍"
               round
               backgroundColor={Colors.white}
+              onPress={showBar}
             />
           </View>
         </View>
-        <Button
-          label="Alert an event"
-          backgroundColor={Colors.green30}
-          labelStyle={{ fontWeight: 'bold ' }}
-        />
-      </View>
-      <Mapbox.MapView style={{ flex: 1 }} />
+      </Animated.View>
+      <MapView />
+      <ModalView />
     </View>
   );
 }
 
-export default Home;
+// display multiple markers on the mapview component
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#6BA2B4',
-    justifyContent: 'space-around',
-  },
-});
+export default Home;
