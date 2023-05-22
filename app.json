@@ -3,6 +3,7 @@
     "name": "oavel-app",
     "slug": "oavel-app",
     "version": "1.0.0",
+    "scheme": "oavel",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "oavel"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +26,17 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox",
+          "RNMapboxMapsDownloadToken": "sk.eyJ1IjoiY29yZW50aW4yOSIsImEiOiJjbGh4N2V3cXcwMDE4M3FzN3N1bW9kdGcwIn0.GBh36nz0EQPAcOtQt216aQ"
+        }
+      ]
+    ]
   }
 }
