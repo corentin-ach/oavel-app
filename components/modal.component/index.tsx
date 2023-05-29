@@ -1,22 +1,26 @@
+/* eslint-disable unicorn/no-null */
 import React, { useCallback, useMemo, useRef } from 'react';
 import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet';
-import {
-  Button,
-  Card,
-  Colors,
-  GridView,
-  Text,
-  View,
-} from 'react-native-ui-lib';
+import { Button, Card, Chip, Colors, Text, View } from 'react-native-ui-lib';
 import { useSharedValue } from 'react-native-reanimated';
+import { SpotState } from '../../redux/spot';
+import { computeStatusColor } from '../../functions/computeStatusColor';
+import { format } from 'date-fns';
 
-function ModalView() {
+type Props = {
+  spot: SpotState;
+  spots: Array<SpotState>;
+};
+
+function ModalView(props: Props) {
+  const { spot, spots } = props;
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['25%', '50%'], []);
+  const snapPoints = useMemo(() => ['15%', '40%', '60%'], []);
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
   }, []);
-  const footerPosition = useSharedValue(0);
+
+  const s = spots?.find((item) => item.id === spot.id);
 
   const renderFooter = useCallback(
     (props) => (
@@ -25,13 +29,26 @@ function ModalView() {
           <Button
             label="📢"
             round
-            style={{ backgroundColor: Colors.green40, height: 60, width: 60 }}
+            style={{ backgroundColor: Colors.orange40, height: 60, width: 60 }}
           />
         </View>
       </BottomSheetFooter>
     ),
     [],
   );
+
+  const filteredInfo = s?.info
+    ? Object.entries(s?.info)
+        .filter(([key, value]) => value === true)
+        .map(([key, value]) => (
+          <View key={key} style={{ margin: 3 }}>
+            <Chip
+              key={key}
+              label={key.charAt(0).toUpperCase() + key.slice(1)}
+            />
+          </View>
+        ))
+    : null;
 
   return (
     <BottomSheet
@@ -42,22 +59,59 @@ function ModalView() {
       footerComponent={renderFooter}
     >
       <View style={{ padding: 15 }}>
+        <Text text80>{`Last update on ${format(
+          new Date(),
+          'dd MMM HH:mm',
+        )}`}</Text>
         <Text text40 style={{ fontWeight: '800' }}>
-          Live data
+          {s?.name}
         </Text>
-        <View style={{ flexDirection: 'row', height: 80 }}>
-          <Card flex center style={{ borderRadius: 10 }}>
+        <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
+          {filteredInfo}
+        </View>
+        <View style={{ flexDirection: 'row', height: 80, marginTop: 15 }}>
+          <Card
+            flex
+            center
+            style={{
+              marginRight: 10,
+              backgroundColor: computeStatusColor(s?.quality?.water),
+            }}
+          >
             <Text text40>🌊</Text>
             <Text>Water</Text>
           </Card>
-          <Card flex center>
+          <Card
+            flex
+            center
+            style={{
+              backgroundColor: computeStatusColor(s?.quality?.plastic),
+            }}
+          >
             <Text text40>🧃</Text>
             <Text>Plastic</Text>
           </Card>
-          <Card flex center>
+          <Card
+            flex
+            center
+            style={{
+              marginLeft: 10,
+              backgroundColor: computeStatusColor(s?.quality?.risk),
+            }}
+          >
             <Text text40>🦈</Text>
             <Text>Risk</Text>
           </Card>
+        </View>
+        <View
+          style={{
+            backgroundColor: Colors.grey70,
+            padding: 10,
+            borderRadius: 10,
+            marginTop: 15,
+          }}
+        >
+          <Text>{s?.quality?.observation}</Text>
         </View>
       </View>
     </BottomSheet>

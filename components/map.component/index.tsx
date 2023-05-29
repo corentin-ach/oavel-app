@@ -1,35 +1,70 @@
 import Mapbox from '@rnmapbox/maps';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { useGetFirestore } from '../../firebase/api';
+import { useDispatch } from 'react-redux';
+import { SpotState, setSpot } from '../../redux/spot';
+import { setBounds } from '../../redux/bounds';
+import { Colors } from 'react-native-ui-lib';
 
 function MapView() {
   Mapbox.setAccessToken(
     'pk.eyJ1IjoiY29yZW50aW4yOSIsImEiOiJja3V3dmgxOG0wMTdpMnZsOGs2OGU4eDQzIn0.p3UORX0_zEWs7XpxBBWMHA',
   );
 
+  const dispatch = useDispatch();
+  const spots = useGetFirestore('spots');
+  const camera = useRef<Mapbox.Camera>(null);
+  const shapeSource = useRef<Mapbox.ShapeSource>(null);
+
   const markers: GeoJSON.FeatureCollection = useMemo(
     () => ({
       type: 'FeatureCollection',
-      features: [
-        {
+      features: spots.map((spot) => {
+        return {
           type: 'Feature',
-          properties: { color: 'red' },
+          properties: {
+            ...spot,
+            stringStatus: spot.status ? 'true' : 'false',
+          },
           geometry: {
             type: 'Point',
-            coordinates: [151.75, -32.94],
+            coordinates: [spot.coords[1], spot.coords[0]],
           },
-        },
-        {
-          type: 'Feature',
-          properties: { color: 'red' },
-          geometry: {
-            type: 'Point',
-            coordinates: [151.78, -32.92],
-          },
-        },
-      ],
+        };
+      }),
     }),
-    [],
+    [spots],
   );
+
+  const onMarkersPress = async (event: any) => {
+    const feature = event.features[0];
+
+    const spot = {
+      id: feature?.properties?.id,
+      name: feature?.properties?.name,
+      coords: feature?.geometry?.coordinates,
+      status: feature?.properties?.status,
+      quality: feature?.properties?.quality,
+    };
+
+    if (feature.properties?.cluster) {
+      const zoom = await shapeSource.current?.getClusterExpansionZoom(feature);
+      camera.current?.setCamera({
+        centerCoordinate: feature?.geometry?.coordinates,
+        zoomLevel: zoom,
+      });
+    } else {
+      camera.current?.setCamera({
+        centerCoordinate: feature?.geometry?.coordinates,
+        zoomLevel: 15,
+      });
+      dispatch(setSpot(spot));
+    }
+  };
+
+  const onMapIdle = (event) => {
+    dispatch(setBounds(event.properties.bounds));
+  };
 
   return (
     <Mapbox.MapView
@@ -37,13 +72,18 @@ function MapView() {
       logoEnabled={false}
       styleURL={'mapbox://styles/corentin29/ckw9knz2x404s14pa0wiytqju'}
       style={{ flex: 1 }}
+      onMapIdle={onMapIdle}
     >
-      <Mapbox.Camera zoomLevel={9} centerCoordinate={[151.75, -32.94]} />
+      <Mapbox.Camera ref={camera} />
       <Mapbox.ShapeSource
+        ref={shapeSource}
         cluster
         clusterRadius={50}
         id="markers"
         shape={markers}
+        onPress={(event: any) => {
+          onMarkersPress(event);
+        }}
       >
         <Mapbox.CircleLayer
           id="unclusteredCircle"
@@ -55,7 +95,13 @@ function MapView() {
           id="clusters"
           sourceID="markers"
           filter={['has', 'point_count']}
-          style={styles.clustersCircleLayer}
+          style={{
+            circleColor: spots.some((s: SpotState) => s.status)
+              ? Colors.orange30
+              : Colors.green30,
+            circleRadius: 40,
+            circleBlur: 0.6,
+          }}
         />
         <Mapbox.SymbolLayer
           id="clusterCount"
@@ -70,13 +116,16 @@ function MapView() {
 
 const styles = {
   unclusteredPointCircleLayer: {
-    circleColor: '#65DEAB',
+    circleColor: [
+      'match',
+      ['get', 'stringStatus'],
+      'false',
+      Colors.green30,
+      'true',
+      Colors.orange30,
+      '#5DADEC',
+    ],
     circleRadius: 12,
-  },
-  clustersCircleLayer: {
-    circleColor: '#65DEAB',
-    circleRadius: 40,
-    circleBlur: 0.6,
   },
   clusterCountSymbolLayer: {
     textField: ['get', 'point_count_abbreviated'], // Show the number of points that has been clustered
