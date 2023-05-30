@@ -1,7 +1,8 @@
+/* eslint-disable unicorn/no-null */
 import { createSlice } from '@reduxjs/toolkit';
 
 type Quality = {
-  date: string;
+  date: string | null;
   water: number;
   plastic: number;
   risk: number;
@@ -16,7 +17,7 @@ type Info = {
 };
 
 export type SpotState = {
-  id: string;
+  id: string | null;
   name: string;
   coords: Array<number>;
   status: boolean;
@@ -25,7 +26,7 @@ export type SpotState = {
 };
 
 const initialState: SpotState = {
-  id: 'JysILezmrkytyCg9mar8',
+  id: null,
   name: 'Newy Beach',
   coords: [0, 0],
   status: false,

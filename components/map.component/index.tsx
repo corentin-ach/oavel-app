@@ -5,17 +5,27 @@ import { useDispatch } from 'react-redux';
 import { SpotState, setSpot } from '../../redux/spot';
 import { setBounds } from '../../redux/bounds';
 import { Colors } from 'react-native-ui-lib';
+import BottomSheet from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet';
+import { useStatusInBounds } from '../../functions/useStatusInBounds';
 
-function MapView() {
+type Props = {
+  bottomSheetRef: React.RefObject<BottomSheet>;
+};
+
+function MapView(props: Props) {
   Mapbox.setAccessToken(
     'pk.eyJ1IjoiY29yZW50aW4yOSIsImEiOiJja3V3dmgxOG0wMTdpMnZsOGs2OGU4eDQzIn0.p3UORX0_zEWs7XpxBBWMHA',
   );
 
+  const { bottomSheetRef } = props;
   const dispatch = useDispatch();
   const spots = useGetFirestore('spots');
   const camera = useRef<Mapbox.Camera>(null);
   const shapeSource = useRef<Mapbox.ShapeSource>(null);
 
+  /**
+   * * Map the markers on the map after fetching from Firebase*
+   */
   const markers: GeoJSON.FeatureCollection = useMemo(
     () => ({
       type: 'FeatureCollection',
@@ -36,6 +46,10 @@ function MapView() {
     [spots],
   );
 
+  /**
+   * * Interractions with the markers, display the spot
+   * @param event
+   */
   const onMarkersPress = async (event: any) => {
     const feature = event.features[0];
 
@@ -59,12 +73,28 @@ function MapView() {
         zoomLevel: 15,
       });
       dispatch(setSpot(spot));
+      bottomSheetRef.current?.snapToIndex(0);
     }
   };
 
+  /**
+   * * Set the bounds of the map in the store*
+   * @param event
+   */
   const onMapIdle = (event) => {
     dispatch(setBounds(event.properties.bounds));
   };
+
+  /**
+   * * Display the spot which are into the bounds*
+   */
+  const { spotToSnap } = useStatusInBounds();
+  useEffect(() => {
+    if (spotToSnap) {
+      dispatch(setSpot(spotToSnap));
+      bottomSheetRef.current?.snapToIndex(0);
+    }
+  });
 
   return (
     <Mapbox.MapView

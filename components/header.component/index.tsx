@@ -23,7 +23,7 @@ function Header(props: Props) {
     };
   }, []);
 
-  const warningInBounds = useStatusInBounds();
+  const { warningInBounds } = useStatusInBounds();
 
   return (
     <Animated.View

@@ -1,9 +1,14 @@
 /* eslint-disable unicorn/filename-case */
+/* eslint-disable unicorn/no-null */
+
 import { useSelector } from 'react-redux';
 import { useGetFirestore } from '../firebase/api';
 import { RootState } from '../redux/store';
-import { SpotState } from '../redux/spot';
+import { SpotState, setSpot } from '../redux/spot';
 
+/**
+ * *Compute the points wich are into the screen bounds
+ */
 export function useStatusInBounds() {
   const { bounds } = useSelector((state: RootState) => state);
 
@@ -19,6 +24,8 @@ export function useStatusInBounds() {
     );
   });
 
+  const spotToSnap = spotInBounds.length === 1 ? spotInBounds[0] : null;
+
   const warningInBounds = spotInBounds.find((s: SpotState) => s.status);
-  return warningInBounds;
+  return { warningInBounds, spotToSnap };
 }

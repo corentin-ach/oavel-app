@@ -1,24 +1,24 @@
 /* eslint-disable unicorn/no-null */
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet';
 import { Button, Card, Chip, Colors, Text, View } from 'react-native-ui-lib';
 import { useSharedValue } from 'react-native-reanimated';
-import { SpotState } from '../../redux/spot';
+import { SpotState, setSpot } from '../../redux/spot';
 import { computeStatusColor } from '../../functions/computeStatusColor';
 import { format } from 'date-fns';
+import { useDispatch } from 'react-redux';
+import { useStatusInBounds } from '../../functions/useStatusInBounds';
 
 type Props = {
   spot: SpotState;
   spots: Array<SpotState>;
+  bottomSheetRef: React.RefObject<BottomSheet>;
 };
 
 function ModalView(props: Props) {
-  const { spot, spots } = props;
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['15%', '40%', '60%'], []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-  }, []);
+  const { spot, spots, bottomSheetRef } = props;
+  const snapPoints = ['40%', '10%'];
+  const dispatch = useDispatch();
 
   const s = spots?.find((item) => item.id === spot.id);
 
@@ -55,7 +55,6 @@ function ModalView(props: Props) {
       ref={bottomSheetRef}
       index={1}
       snapPoints={snapPoints}
-      onChange={handleSheetChanges}
       footerComponent={renderFooter}
     >
       <View style={{ padding: 15 }}>
