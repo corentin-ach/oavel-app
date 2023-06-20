@@ -61,12 +61,12 @@ function Header(props: Props) {
         />
         <View>
           <Text style={{ fontWeight: '800', fontSize: 20 }}>
-            {warningInBounds ? 'Danger,' : 'Welcome,'}
+            {warningInBounds ? 'Dangerous,' : 'Welcome,'}
           </Text>
           <Text>
             {warningInBounds
-              ? 'Be careful on this area'
-              : 'No perturbations into this area'}
+              ? 'be careful around this area'
+              : 'no perturbations here'}
           </Text>
         </View>
       </View>
