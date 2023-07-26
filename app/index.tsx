@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import Home from './home';
+import Home from './home/main';
 import { store } from '../redux/store';
 
 export default function Root() {

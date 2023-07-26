@@ -5,7 +5,7 @@ import { Button, Card, Chip, Colors, Text, View } from 'react-native-ui-lib';
 import { SpotState } from '../../redux/spot';
 import { computeStatusColor } from '../../functions/computeStatusColor';
 import { format } from 'date-fns';
-import { Link, useNavigation } from 'expo-router';
+import { Link, useNavigation, useRouter } from 'expo-router';
 
 type Props = {
   spot: SpotState;
@@ -18,27 +18,26 @@ function ModalView(props: Props) {
   const snapPoints = [spot?.id ? '40%' : '15%', '15%'];
 
   const s = spots?.find((item) => item.id === spot.id);
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const renderFooter = useCallback(
     (props) => (
       <BottomSheetFooter {...props} bottomInset={24}>
         <View flex right style={{ padding: 20 }}>
-          <Link href="modal">
-            <Button
-              label="📢"
-              round
-              style={{
-                backgroundColor: Colors.orange40,
-                height: 60,
-                width: 60,
-              }}
-            />
-          </Link>
+          <Button
+            label="📢"
+            round
+            style={{
+              backgroundColor: Colors.orange40,
+              height: 60,
+              width: 60,
+            }}
+            onPress={() => router.push('/home/alert')}
+          />
         </View>
       </BottomSheetFooter>
     ),
-    [],
+    [router],
   );
 
   const filteredInfo = s?.info
