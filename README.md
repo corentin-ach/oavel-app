@@ -16,3 +16,5 @@ Oavel is a project that aims to be open source, collaborative, educational, and 
 From a technical point of view, this project uses React Native and Expo. Firebase for site and data hosting. Every new feature is pushed to Git and a CI has been put in place. This project is regularly tested, in particular via unit tests. Particular attention has been paid to the UI/UX, with the aim of making the application simple and light on the eye.
 
 Thank you for your attention to Oavel and welcome!
+
+![cover](https://github.com/corentin-ach/oavel-app/assets/34914748/f5b902f3-096b-4713-a6ac-aa42672061b3)
